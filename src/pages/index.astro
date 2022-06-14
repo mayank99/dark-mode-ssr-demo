@@ -58,25 +58,37 @@ const theme = cookie?.split('theme=')[1].split(';')[0];
 	</script>
 
 	<style lang='scss'>
-		:global(*) {
-			margin: 0;
-			box-sizing: border-box;
+		@mixin dark-theme {
+			color-scheme: dark;
+			--color-brand: hsl(260deg 47% 29%);
+			// ...add more dark theme CSS variables here
+		}
+
+		@mixin light-theme {
+			color-scheme: light;
+			--color-brand: hsl(263deg 65% 89%);
+			// ...add more light theme CSS variables here
 		}
 
 		html {
+			@include dark-theme;
 
-			&, // default to dark theme in case JS is disabled
+			@media (prefers-color-scheme: light) {
+				@include light-theme;
+			}
+
 			&[data-theme='dark'] {
-				color-scheme: dark;
-				--color-brand: hsl(260deg 47% 29%);
-				// ...add more dark theme CSS variables here
+				@include dark-theme;
 			}
 
 			&[data-theme='light'] {
-				color-scheme: light;
-				--color-brand: hsl(263deg 65% 89%);
-				// ...add more light theme CSS variables here
+				@include light-theme;
 			}
+		}
+
+		:global(*) {
+			margin: 0;
+			box-sizing: border-box;
 		}
 
 		body {
@@ -98,7 +110,7 @@ const theme = cookie?.split('theme=')[1].split(';')[0];
 			position: fixed;
 			top: 0;
 			right: 0;
-			padding: 2rem;
+			padding: 1rem 1.5rem;
 			display: grid;
 			justify-items: end;
 
@@ -114,22 +126,35 @@ const theme = cookie?.split('theme=')[1].split(';')[0];
 			align-items: center;
 			gap: 0.5rem;
 			padding: 0.75rem 1.75rem 0.75rem 2rem;
-			background: var(--color-brand);
 			color: inherit;
+			position: relative;
 			border-radius: 0.5rem;
-			opacity: 0.8;
-			transition: opacity 0.2s ease-in-out;
+			-webkit-tap-highlight-color: transparent;
+			isolation: isolate;
+
+			&::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				border-radius: inherit;
+				background-color: var(--color-brand);
+				transition: opacity 0.2s ease-in-out;
+				opacity: 0.8;
+				z-index: -1;
+			}
 
 			>svg {
-				width: 1.2rem;
-				height: 1.2rem;
-				margin-bottom: -0.25rem;
+				width: 1rem;
+				height: 1rem;
+				margin-bottom: -2px; // try to align icon with text
 				transition: transform 0.2s ease-in-out;
 				will-change: transform;
 			}
 
 			&:hover {
-				opacity: 1;
+				&::before {
+					opacity: 1;
+				}
 
 				>svg {
 					transform: translate(10%, -5%);
