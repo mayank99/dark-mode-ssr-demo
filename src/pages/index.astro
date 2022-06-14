@@ -1,0 +1,142 @@
+---
+import ThemeToggle from '../components/ThemeToggle.astro';
+import Arrow from '../components/Arrow.astro';
+
+// this cookie gets set client side in two places: initial visit and on theme toggle
+const cookie = Astro.request.headers.get('cookie');
+
+// if truthy, this theme will be set as data-theme on first render
+const theme = cookie?.split('theme=')[1].split(';')[0];
+---
+
+<html lang='en' data-theme={theme}>
+
+<head>
+	<meta charset='utf-8' />
+	<meta name='viewport' content='width=device-width' />
+	<title>Theme toggle with Astro SSR</title>
+	<script is:inline>
+		// blocking script that executes the logic only on first visit
+		if (!document.documentElement.dataset.theme) {
+			const theme = document.cookie?.split('theme=')[1]?.split(';')[0] ?? (window.matchMedia('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light');
+			document.cookie = `theme=${theme}`;
+			document.documentElement.dataset.theme = theme;
+		}
+	</script>
+</head>
+
+<body>
+	<div class='theme-toggle-wrapper'>
+		<ThemeToggle id='theme-toggle' />
+		<Arrow />
+		<p id='theme-instructions'>Try toggling the theme and refreshing</p>
+	</div>
+
+	<h1>Hello 🍪</h1>
+	<p>
+		This document should show up in the correct theme every single time, without any
+		<a href='https://css-tricks.com/flash-of-inaccurate-color-theme-fart/'>FART</a>.
+		This is done through cookies with <a href='https://astro.build/'>Astro</a> SSR.
+	</p>
+
+	<a class='cta' href='https://github.com/mayank99/dark-mode-ssr-demo'>
+		Code on GitHub
+		<svg aria-hidden='true' width='15' height='15' viewBox='0 0 15 15' fill='none' xmlns='http://www.w3.org/2000/svg'>
+			<path
+				d='M3.64645 11.3536C3.45118 11.1583 3.45118 10.8417 3.64645 10.6465L10.2929 4L6 4C5.72386 4 5.5 3.77614 5.5 3.5C5.5 3.22386 5.72386 3 6 3L11.5 3C11.6326 3 11.7598 3.05268 11.8536 3.14645C11.9473 3.24022 12 3.36739 12 3.5L12 9.00001C12 9.27615 11.7761 9.50001 11.5 9.50001C11.2239 9.50001 11 9.27615 11 9.00001V4.70711L4.35355 11.3536C4.15829 11.5488 3.84171 11.5488 3.64645 11.3536Z'
+				fill='currentColor' fill-rule='evenodd' clip-rule='evenodd' />
+		</svg>
+	</a>
+
+	<script is:inline>
+		// when theme toggle is clicked, we update the cookie and the data-theme attribute
+		document.querySelector('#theme-toggle')?.addEventListener('click', () => {
+			const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+			document.documentElement.dataset.theme = nextTheme;
+			document.cookie = `theme=${nextTheme}`;
+		});
+	</script>
+
+	<style lang='scss'>
+		:global(*) {
+			margin: 0;
+			box-sizing: border-box;
+		}
+
+		html {
+
+			&, // default to dark theme in case JS is disabled
+			&[data-theme='dark'] {
+				color-scheme: dark;
+				--color-brand: hsl(260deg 47% 29%);
+				// ...add more dark theme CSS variables here
+			}
+
+			&[data-theme='light'] {
+				color-scheme: light;
+				--color-brand: hsl(263deg 65% 89%);
+				// ...add more light theme CSS variables here
+			}
+		}
+
+		body {
+			height: 100vh;
+			height: 100dvh;
+			font-family: system-ui, sans-serif;
+			font-size: 1.2rem;
+			display: grid;
+			gap: 2rem;
+			place-content: center;
+			padding: 2rem;
+		}
+
+		p {
+			max-width: 50ch;
+		}
+
+		.theme-toggle-wrapper {
+			position: fixed;
+			top: 0;
+			right: 0;
+			padding: 2rem;
+			display: grid;
+			justify-items: end;
+
+			p {
+				font-size: 1rem;
+			}
+		}
+
+		.cta {
+			justify-self: start;
+			text-decoration: none;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.75rem 1.75rem 0.75rem 2rem;
+			background: var(--color-brand);
+			color: inherit;
+			border-radius: 0.5rem;
+			opacity: 0.8;
+			transition: opacity 0.2s ease-in-out;
+
+			>svg {
+				width: 1.2rem;
+				height: 1.2rem;
+				margin-bottom: -0.25rem;
+				transition: transform 0.2s ease-in-out;
+				will-change: transform;
+			}
+
+			&:hover {
+				opacity: 1;
+
+				>svg {
+					transform: translate(10%, -5%);
+				}
+			}
+		}
+	</style>
+</body>
+
+</html>
