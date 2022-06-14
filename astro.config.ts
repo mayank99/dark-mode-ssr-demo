@@ -1,8 +1,9 @@
 import { defineConfig } from 'astro/config';
 
-import node from '@astrojs/node';
+// @ts-ignore -- TS doesn't like this path for some reason
+import netlify from '@astrojs/netlify/functions';
 
 // https://astro.build/config
 export default defineConfig({
-  adapter: node(),
+  adapter: netlify(),
 });
