@@ -14,18 +14,20 @@ const theme = cookie?.split('theme=')[1].split(';')[0];
 		<meta charset='utf-8' />
 		<meta name='viewport' content='width=device-width' />
 		<title>Theme toggle with Astro SSR</title>
-		<script is:inline>
-			// blocking script that executes the logic only on first visit
-			if (!document.documentElement.dataset.theme) {
-				const theme =
-					document.cookie?.split('theme=')[1]?.split(';')[0] ??
-					(window.matchMedia('(prefers-color-scheme: dark)')?.matches
-						? 'dark'
-						: 'light');
-				document.cookie = `theme=${theme}`;
-				document.documentElement.dataset.theme = theme;
-			}
-		</script>
+		{!theme && (
+			<script is:inline>
+				// blocking script that executes the logic only on first visit
+				if (!document.documentElement.dataset.theme) {
+					const theme =
+						document.cookie?.split('theme=')[1]?.split(';')[0] ??
+						(window.matchMedia('(prefers-color-scheme: dark)')?.matches
+							? 'dark'
+							: 'light');
+					document.cookie = `theme=${theme}`;
+					document.documentElement.dataset.theme = theme;
+				}
+			</script>
+		)}
 	</head>
 
 	<body>
